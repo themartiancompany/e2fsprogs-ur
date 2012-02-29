@@ -2,7 +2,7 @@
 # Contributor: judd <jvinet@zeroflux.org>
 
 pkgname=e2fsprogs
-pkgver=1.42
+pkgver=1.42.1
 pkgrel=1
 pkgdesc="Ext2/3/4 filesystem utilities"
 arch=('i686' 'x86_64')
@@ -15,8 +15,9 @@ source=("http://downloads.sourceforge.net/sourceforge/${pkgname}/${pkgname}-${pk
         'MIT-LICENSE')
 backup=('etc/mke2fs.conf')
 install=${pkgname}.install
-sha1sums=('e69bc63bc319e4d1e4242cc278bfd442a60646e6'
+sha1sums=('c25c73de98737b5f6fb9debec36bfb6416b0ac07'
           'f4a0d5b0cdb980e3fedd6f5e7dde0b0ffb7bbdfb')
+
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
 
