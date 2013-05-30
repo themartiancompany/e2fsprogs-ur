@@ -3,7 +3,7 @@
 
 pkgname=e2fsprogs
 pkgver=1.42.7
-pkgrel=1
+pkgrel=2
 pkgdesc="Ext2/3/4 filesystem utilities"
 arch=('i686' 'x86_64')
 license=('GPL' 'LGPL' 'MIT')
@@ -44,4 +44,11 @@ package() {
   # install MIT license
   install -Dm644 "${srcdir}/MIT-LICENSE" \
     "${pkgdir}/usr/share/licenses/${pkgname}/MIT-LICENSE"
+
+  # usrmove
+  cd "$pkgdir"
+  mv sbin/* usr/bin/
+  rmdir sbin
+  mv usr/sbin/* usr/bin/
+  rmdir usr/sbin
 }
