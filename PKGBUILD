@@ -3,7 +3,7 @@
 
 pkgname=e2fsprogs
 pkgver=1.42.8
-pkgrel=1
+pkgrel=2
 pkgdesc="Ext2/3/4 filesystem utilities"
 arch=('i686' 'x86_64')
 license=('GPL' 'LGPL' 'MIT')
@@ -14,6 +14,7 @@ makedepends=('bc')
 source=("http://downloads.sourceforge.net/sourceforge/${pkgname}/${pkgname}-${pkgver}.tar.gz"
         'MIT-LICENSE')
 backup=('etc/mke2fs.conf')
+options=('staticlibs')
 install=${pkgname}.install
 sha1sums=('79cdb2374a9c0e68f01739598679db06d546b897'
           'f4a0d5b0cdb980e3fedd6f5e7dde0b0ffb7bbdfb')
@@ -40,6 +41,9 @@ package() {
   # remove references to build directory
   sed -i -e 's#^SS_DIR=.*#SS_DIR="/usr/share/ss"#' "${pkgdir}/usr/bin/mk_cmds"
   sed -i -e 's#^ET_DIR=.*#ET_DIR="/usr/share/et"#' "${pkgdir}/usr/bin/compile_et"
+
+  # remove static libraries with a shared counterpart
+  rm ${pkgdir}/usr/lib/lib{com_err,e2p,ext2fs,ss}.a
 
   # install MIT license
   install -Dm644 "${srcdir}/MIT-LICENSE" \
