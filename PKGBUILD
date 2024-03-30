@@ -5,14 +5,16 @@
 # # Maintainer: Ronald van Haren <ronald.archlinux.org>
 # Contributor: judd <jvinet@zeroflux.org>
 
-_systemd=true
+_static="false"
+_systemd="true"
 _host="kernel"
 _os="$( \
   uname \
   -o)"
 [[ "${_os}" == "Android"  ]] && \
   _systemd="false" && \
-  _host="github"
+  _host="github" && \
+  _static="true"
 _fs=e2fs
 _pkg="${_fs}progs"
 pkgbase="${_pkg}"
@@ -144,6 +146,11 @@ build() {
       --disable-e2initrd-helper
       --disable-defrag
     )
+  [[ "${_static}" == "true" ]] && \
+    _configure_opts+=(
+      --enable-static
+      --disable-shared
+    ) 
   cd \
     "${srcdir}/${_tarname}"
   echo \
@@ -220,10 +227,10 @@ package_e2fsprogs() {
       "${pkgdir}/usr/bin/compile_et"
   # remove static libraries
   # with a shared counterpart
-  rm \
-    -rf \
-    "${pkgdir}/usr/lib/lib"{com_err,e2p,ext2fs,ss}.a
-
+  [[ "${_static}" == "false" ]] && \
+    rm \
+      -rf \
+      "${pkgdir}/usr/lib/lib"{com_err,e2p,ext2fs,ss}.a
   # remove fuse2fs which
   # will be packaged separately
   rm \
