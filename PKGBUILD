@@ -221,7 +221,8 @@ package_e2fsprogs() {
   # remove static libraries
   # with a shared counterpart
   rm \
-  "${pkgdir}/usr/lib/lib"{com_err,e2p,ext2fs,ss}.a
+    -rf \
+    "${pkgdir}/usr/lib/lib"{com_err,e2p,ext2fs,ss}.a
 
   # remove fuse2fs which
   # will be packaged separately
