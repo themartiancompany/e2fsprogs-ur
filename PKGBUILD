@@ -13,11 +13,12 @@ _os="$( \
 [[ "${_os}" == "Android"  ]] && \
   _systemd="false" && \
   _host="github"
-_pkg=e2fsprogs
+_fs=e2fs
+_pkg="${_fs}progs"
 pkgbase="${_pkg}"
 pkgname=(
   "${_pkg}"
-  'fuse2fs'
+  "fus${_fs}"
 )
 _commit="260dfea450e387cbd2c8de79a7c2eeacc26f74e9"
 _pkgver=1.47.0
@@ -148,12 +149,12 @@ build() {
   echo \
     "configure options:" \
     "${_configure_opts[@]}"
-  LDFLAGS="${_cflags[*]}" \
+  LDFLAGS="${_ldflags[*]}" \
   CFLAGS="${_cflags[*]}" \
   CXXFLAGS="${_cflags[*]}" \
   ./configure \
     "${_configure_opts[@]}"
-  LDFLAGS="${_cflags[*]}" \
+  LDFLAGS="${_ldflags[*]}" \
   CFLAGS="${_cflags[*]}" \
   CXXFLAGS="${_cflags[*]}" \
   make
@@ -161,11 +162,11 @@ build() {
   find \
     po \
     -name \
-      '*.gmo'
+      '*.gmo' \
+   -delete
+  LDFLAGS="${_ldflags[*]}" \
   CFLAGS="${_cflags[*]}" \
   CXXFLAGS="${_cflags[*]}" \
-  LDFLAGS="${_ldflags[*]}" \
-   -delete
   make \
     -C \
       po \
@@ -175,7 +176,8 @@ build() {
 package_e2fsprogs() {
   depends=(
     'sh'
-    'util-linux-libs')
+    'util-linux-libs'
+  )
   optdepends=(
     'lvm2: for e2scrub'
     'util-linux: for e2scrub'
@@ -188,7 +190,7 @@ package_e2fsprogs() {
     'libss.so'
   )
   backup=(
-    'etc/mke2fs.conf'
+    "etc/mk${_fs}.conf"
     'etc/e2scrub.conf'
   )
   unset \
@@ -224,30 +226,30 @@ package_e2fsprogs() {
   # remove fuse2fs which
   # will be packaged separately
   rm \
-    "${pkgdir}/usr/"{bin/fuse2fs,share/man/man1/fuse2fs.1}
+    "${pkgdir}/usr/"{"bin/fus${_fs}","share/man/man1/fus${_fs}.1"}
   # install MIT license
   install \
     -Dm0644 \
     "${srcdir}/MIT-LICENSE" \
-    "${pkgdir}/usr/share/licenses/${pkgname}/MIT-LICENSE"
+    "${pkgdir}/usr/share/licenses/${_pkg}/MIT-LICENSE"
 }
 
 package_fuse2fs() {
   pkgdesc='Ext2/3/4 filesystem driver for FUSE'
   depends=(
     'fuse'
-    'e2fsprogs'
+    "${_pkg}"
   )
   cd \
     "${srcdir}/${_tarname}"
   install \
     -Dm0755 \
-    'misc/fuse2fs' \
-    "${pkgdir}/usr/bin/fuse2fs"
+    "misc/fus${_fs}" \
+    "${pkgdir}/usr/bin/fus${_fs}"
   install \
     -Dm0644 \
-    'misc/fuse2fs.1' \
-    "${pkgdir}/usr/share/man/man1/fuse2fs.1"
+    "misc/fus${_fs}.1" \
+    "${pkgdir}/usr/share/man/man1/fus${_fs}.1"
   mkdir \
     -p \
     "${pkgdir}"/usr/share/licenses
