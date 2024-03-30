@@ -1,13 +1,14 @@
+os: Android
 pkgbase = e2fsprogs
 	pkgdesc = Ext2/3/4 filesystem utilities
 	pkgver = 1.47.0
 	pkgrel = 2
 	url = http://e2fsprogs.sourceforge.net
 	arch = x86_64
+	arch = arm
 	license = GPL
 	license = LGPL
 	license = MIT
-	makedepends = systemd
 	makedepends = util-linux
 	makedepends = fuse
 	source = https://www.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v1.47.0/e2fsprogs-1.47.0.tar.xz
