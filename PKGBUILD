@@ -13,7 +13,8 @@ echo \
   "os: ${_os}"
 [[ "${_os}" == "Android"  ]] && \
   _systemd="false"
-pkgbase=e2fsprogs
+_pkg=e2fsprogs
+pkgbase="${_pkg}"
 pkgname=(
   'e2fsprogs'
   'fuse2fs'
@@ -30,7 +31,7 @@ license=(
   'LGPL'
   'MIT'
 )
-url='http://e2fsprogs.sourceforge.net'
+url="http://${_pkg}.sourceforge.net"
 makedepends=(
   'util-linux'
   'fuse'
@@ -42,9 +43,12 @@ validpgpkeys=(
    # Theodore Ts'o <tytso@mit.edu>
   '3AB057B7E78D945C8C5591FBD36F769BC11804F0'
   )
+_kernel="https://www.kernel.org/pub/linux/kernel/people"
+_ns="tytso"
 source=(
-  "https://www.kernel.org/pub/linux/kernel/people/tytso/${pkgbase}/v${pkgver}/${pkgbase}-${pkgver}.tar."{xz,sign}
-        'MIT-LICENSE')
+  "${_kernel}/${_ns}/${_pkg}/v${pkgver}/${_pkg}-${pkgver}.tar."{xz,sign}
+  'MIT-LICENSE'
+)
 sha256sums=(
   '144af53f2bbd921cef6f8bea88bb9faddca865da3fbc657cc9b4d2001097d5db'
   'SKIP'
@@ -61,9 +65,25 @@ prepare() {
     misc/Makefile.in
 }
 
+_bin="$( \
+  dirname \
+    "$( \
+      command \
+        -v \
+	"cc" \
+	"gcc" | \
+      head \
+        -n \
+	1)")"
+
+_usr="$( \
+  dirname \
+    "${_bin}")"
+
 build() {
   local \
     _cflags=() \
+    _ldflags=() \
     _configure_opts=()
   _configure_opts=(
     --prefix=/usr
@@ -78,33 +98,40 @@ build() {
   )
   _cflags=(
     "${CFLAGS}"
+    -I"${_usr}/include"
+  )
+  _ldflags=(
+    "${LDFLAGS}"
+    -L"${_usr}/include"
   )
   [[ "${_os}" == "Android" ]] && \
     echo \
       "enabling ${_os} flags" && \
     _cflags+=(
       -Wno-implicit-function-declaration
-      -Wno-error-implicit-function-declaration
+      # -Wno-error-implicit-function-declaration
     ) && \
     _configure_opts+=(
       --enable-symlink-install
-      --enable-relative-symlinks
-      --enable-symlink-build
-      --disable-rpath
+      # --enable-relative-symlinks
+      --enable-sym--link-build
+      # --disable-rpath
+      --disable-e2initrd-helper
+      --disable-defrag
     )
   cd \
     "${srcdir}/${pkgbase}-${pkgver}"
   echo \
     "configure options:" \
     "${_configure_opts[@]}"
+  LDFLAGS="${_cflags[*]}" \
   CFLAGS="${_cflags[*]}" \
   CXXFLAGS="${_cflags[*]}" \
-  LDFLAGS="${_cflags[*]}" \
   ./configure \
     "${_configure_opts[@]}"
+  LDFLAGS="${_cflags[*]}" \
   CFLAGS="${_cflags[*]}" \
   CXXFLAGS="${_cflags[*]}" \
-  LDFLAGS="${_ldflags[*]}" \
   make
   # regenerate locale files
   find \
