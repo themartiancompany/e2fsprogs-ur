@@ -6,20 +6,22 @@
 # Contributor: judd <jvinet@zeroflux.org>
 
 _systemd=true
+_host="kernel"
 _os="$( \
   uname \
   -o)"
-echo \
-  "os: ${_os}"
 [[ "${_os}" == "Android"  ]] && \
-  _systemd="false"
+  _systemd="false" && \
+  _host="github"
 _pkg=e2fsprogs
 pkgbase="${_pkg}"
 pkgname=(
-  'e2fsprogs'
+  "${_pkg}"
   'fuse2fs'
 )
-pkgver=1.47.0
+_commit="260dfea450e387cbd2c8de79a7c2eeacc26f74e9"
+_pkgver=1.47.0
+pkgver="${_pkgver}.g${_commit}"
 pkgrel=2
 pkgdesc='Ext2/3/4 filesystem utilities'
 arch=(
@@ -45,19 +47,41 @@ validpgpkeys=(
   )
 _kernel="https://www.kernel.org/pub/linux/kernel/people"
 _ns="tytso"
-source=(
-  "${_kernel}/${_ns}/${_pkg}/v${pkgver}/${_pkg}-${pkgver}.tar."{xz,sign}
+_gh="https://github.com"
+# Latest commit, includes Android NDK build fix
+_commit="260dfea450e387cbd2c8de79a7c2eeacc26f74e9"
+source=()
+sha256sums=()
+[[ "${_host}" == "kernel" ]] && \
+  _tarname="${_pkg}-${pkgver}" \
+  _http="${_kernel}" && \
+  _url="${_http}/${_ns}/${_pkg}" && \
+  source+=(
+    "${_url}/v${pkgver}/${_tarname}.tar.xz"{"","sign"}
+  ) && \
+  sha256sums+=(
+    '144af53f2bbd921cef6f8bea88bb9faddca865da3fbc657cc9b4d2001097d5db'
+    'SKIP'
+  )
+[[ "${_host}" == "github" ]] && \
+  _tarname="${_pkg}-${_commit}" \
+  _http="${_gh}" && \
+  _url="${_http}/${_ns}/${_pkg}" &&
+  source+=(
+    "${_tarname}.zip::${_url}/archive/${_commit}.zip"
+  ) && \
+  sha256sums+=(
+    '4c263b3635b7c734347f82ce2a0c175d26b6c25b668bab1ced1e9a1380a25d0b'
+  )
+source+=(
   'MIT-LICENSE'
 )
-sha256sums=(
-  '144af53f2bbd921cef6f8bea88bb9faddca865da3fbc657cc9b4d2001097d5db'
-  'SKIP'
+sha256sums+=(
   'cc45386c1d71f438ad648fd7971e49e3074ad9dbacf9dd3a5b4cb61fd294ecbb'
 )
-
 prepare() {
   cd \
-    "${srcdir}/${pkgbase}-${pkgver}"
+    "${srcdir}/${_tarname}"
   # Remove unnecessary init.d directory
   sed \
     -i \
@@ -114,13 +138,13 @@ build() {
     _configure_opts+=(
       --enable-symlink-install
       # --enable-relative-symlinks
-      --enable-sym--link-build
+      --enable-symlink-build
       # --disable-rpath
       --disable-e2initrd-helper
       --disable-defrag
     )
   cd \
-    "${srcdir}/${pkgbase}-${pkgver}"
+    "${srcdir}/${_tarname}"
   echo \
     "configure options:" \
     "${_configure_opts[@]}"
@@ -137,7 +161,7 @@ build() {
   find \
     po \
     -name \
-      '*.gmo' \
+      '*.gmo'
   CFLAGS="${_cflags[*]}" \
   CXXFLAGS="${_cflags[*]}" \
   LDFLAGS="${_ldflags[*]}" \
@@ -170,7 +194,7 @@ package_e2fsprogs() {
   unset \
     MAKEFLAGS
   cd \
-    "${srcdir}/${pkgbase}-${pkgver}"
+    "${srcdir}/${_tarname}"
   make \
     DESTDIR="${pkgdir}" \
     PREFIX="/usr" \
@@ -215,7 +239,7 @@ package_fuse2fs() {
     'e2fsprogs'
   )
   cd \
-    "${srcdir}/${pkgbase}-${pkgver}"
+    "${srcdir}/${_tarname}"
   install \
     -Dm0755 \
     'misc/fuse2fs' \
